@@ -1,0 +1,37 @@
+Method,Name,Error,Occurrences
+GET,/nodes/meta/id/EM01-0064-0002,HTTPError('403 Client Error: Forbidden for url: /nodes/meta/id/EM01-0064-0002'),2
+POST,/nodes/assign-vendor,HTTPError('403 Client Error: Forbidden for url: /nodes/assign-vendor'),1
+PUT,/alarms/13/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/13/mark-read'),1
+PUT,/alarms/2/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/2/mark-read'),1
+GET,/sensor-types/get/1,HTTPError('403 Client Error: Forbidden for url: /sensor-types/get/1'),2
+POST,/sensor-types/create,HTTPError('403 Client Error: Forbidden for url: /sensor-types/create'),1
+POST,/onboard/user-request,HTTPError('400 Client Error: Bad Request for url: /onboard/user-request'),6
+POST,/subscription/subscribe,HTTPError('403 Client Error: Forbidden for url: /subscription/subscribe'),1
+GET,/user/getusers,HTTPError('403 Client Error: Forbidden for url: /user/getusers'),1
+POST,/user/login,HTTPError('400 Client Error: Bad Request for url: /user/login'),1
+PUT,/alarms/14/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/14/mark-read'),1
+GET,/user/profile,HTTPError('403 Client Error: Forbidden for url: /user/profile'),1
+GET,/sensor-types/sensor-types-all,HTTPError('403 Client Error: Forbidden for url: /sensor-types/sensor-types-all'),1
+PUT,/alarms/7/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/7/mark-read'),1
+GET,/verticals/verticals-all,HTTPError('403 Client Error: Forbidden for url: /verticals/verticals-all'),1
+PUT,/alarms/9/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/9/mark-read'),1
+PUT,/verticals/update-ae/1,HTTPError('403 Client Error: Forbidden for url: /verticals/update-ae/1'),3
+GET,/alarms/alarms,RemoteDisconnected('Remote end closed connection without response'),1
+POST,/verticals/create-ae,HTTPError('403 Client Error: Forbidden for url: /verticals/create-ae'),1
+PUT,/user/update-user/1,HTTPError('403 Client Error: Forbidden for url: /user/update-user/1'),5
+PUT,/alarms/16/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/16/mark-read'),1
+PUT,/alarms/1/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/1/mark-read'),1
+GET,/nodes/energy_monitoring,HTTPError('403 Client Error: Forbidden for url: /nodes/energy_monitoring'),1
+PUT,/alarms/5/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/5/mark-read'),1
+POST,/nodes/create-cin/2,HTTPError('404 Client Error: Not Found for url: /nodes/create-cin/2'),1
+POST,/sensor-types/assign-vendor,HTTPError('403 Client Error: Forbidden for url: /sensor-types/assign-vendor'),1
+GET,/nodes/fetch-node-data/?vertical_name=energy_monitoring&limit=100&offset=0&as_csv=false,HTTPError('403 Client Error: Forbidden for url: /nodes/fetch-node-data/?vertical_name=energy_monitoring&limit=100&offset=0&as_csv=false'),1
+GET,/subscription/get-user-subscriptions,HTTPError('403 Client Error: Forbidden for url: /subscription/get-user-subscriptions'),1
+GET,/alarms/alarms,HTTPError('403 Client Error: Forbidden for url: /alarms/alarms'),1
+PUT,/alarms/3/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/3/mark-read'),1
+GET,/onboard/get-verticals-request,HTTPError('403 Client Error: Forbidden for url: /onboard/get-verticals-request'),1
+POST,/onboard/approve-vendor?email=vendor929662@test.com,HTTPError('403 Client Error: Forbidden for url: /onboard/approve-vendor?email=vendor929662@test.com'),2
+POST,/verticals/assign-vendor,HTTPError('403 Client Error: Forbidden for url: /verticals/assign-vendor'),1
+PUT,/alarms/15/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/15/mark-read'),1
+GET,/nodes/get-vendor/EM01-0064-0002,HTTPError('403 Client Error: Forbidden for url: /nodes/get-vendor/EM01-0064-0002'),1
+PUT,/alarms/17/mark-read,HTTPError('403 Client Error: Forbidden for url: /alarms/17/mark-read'),1
