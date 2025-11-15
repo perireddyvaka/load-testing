@@ -1,0 +1,20 @@
+Method,Name,Error,Occurrences
+GET,/nodes/get-vendor/test-node,CatchResponseError('GET Failed http://10.2.16.116:8610/nodes/get-vendor/test-node with 404'),14
+POST,/user/login,HTTPError('400 Client Error: Bad Request for url: /user/login'),23
+GET,/nodes/get-node/WQ01-0093-0001/descriptor/latest,CatchResponseError('GET Failed http://10.2.16.116:8610/nodes/get-node/WQ01-0093-0001/descriptor/latest with 404'),17
+GET,/alarms/un-read,CatchResponseError('GET Failed http://10.2.16.116:8610/alarms/un-read with 404'),11
+POST,/user/reset-password,HTTPError('400 Client Error: Bad Request for url: /user/reset-password'),29
+GET,/stats/loners,CatchResponseError('GET Failed http://10.2.16.116:8610/stats/loners with 0'),1
+GET,/nodes/test-node,CatchResponseError('GET Failed http://10.2.16.116:8610/nodes/test-node with 404'),18
+PUT,/verticals/update-ae/1,HTTPError('404 Client Error: Not Found for url: /verticals/update-ae/1'),35
+GET,/nodes/meta/id/1,CatchResponseError('GET Failed http://10.2.16.116:8610/nodes/meta/id/1 with 400'),13
+GET,/alarms/get-all,CatchResponseError('GET Failed http://10.2.16.116:8610/alarms/get-all with 404'),10
+GET,/nodes/fetch-node-data/?vertical_name=water_quality&limit=100&offset=0&as_csv=false,CatchResponseError('GET Failed http://10.2.16.116:8610/nodes/fetch-node-data/?vertical_name=water_quality&limit=100&offset=0&as_csv=false with 0'),1
+GET,/nodes/fetch-node-data/?vertical_name=water_quality&limit=100&offset=0&as_csv=false,CatchResponseError('GET Failed http://10.2.16.116:8610/nodes/fetch-node-data/?vertical_name=water_quality&limit=100&offset=0&as_csv=false with 401'),9
+GET,/nodes/fetch-node-data/?vertical_name=air_quality&limit=50&offset=0&as_csv=false,CatchResponseError('GET Failed http://10.2.16.116:8610/nodes/fetch-node-data/?vertical_name=air_quality&limit=50&offset=0&as_csv=false with 401'),12
+GET,/alarms/get-unread,CatchResponseError('GET Failed http://10.2.16.116:8610/alarms/get-unread with 404'),10
+POST,/nodes/create-cin/1,HTTPError('401 Client Error: Unauthorized for url: /nodes/create-cin/1'),20
+GET,/sensor-types/get/3,CatchResponseError('GET Failed http://10.2.16.116:8610/sensor-types/get/3 with 404'),10
+GET,/listener/listener,CatchResponseError('GET Failed http://10.2.16.116:8610/listener/listener with 404'),11
+GET,/listener/notifications,CatchResponseError('GET Failed http://10.2.16.116:8610/listener/notifications with 404'),10
+POST,/verticals/create-ae,HTTPError('422 Client Error: Unprocessable Entity for url: /verticals/create-ae'),28
