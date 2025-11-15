@@ -1,0 +1,113 @@
+[
+  {
+    "id": 2,
+    "orid": "3-20251028134206993477",
+    "sensor_type_id": 3,
+    "sensor_node_number": 1,
+    "token_num": 2,
+    "labels": [
+      "AE-WM",
+      "WM01-0032-0001"
+    ],
+    "latitude": 17.3421,
+    "longitude": 78.4077,
+    "location": "gachibowli",
+    "area": "gachibowli",
+    "node_name": "WM01-0032-0001",
+    "node_data_orid": "3-20251028134207001048",
+    "name": "WM-S1-Node-1",
+    "protocol": "HTTP",
+    "frequency": "00:00:10",
+    "port": null,
+    "ip": null,
+    "topic": null,
+    "res_name": "bin",
+    "vertical_id": 2,
+    "vertical_name": "waste_management",
+    "assigned_vendor": [
+      {
+        "assigned_vendor_id": 34,
+        "assigned_vendor_name": "Nagendra@IIITHyderabad",
+        "assigned_vendor_email": "nagendra.pagadala@research.iiit.ac.in",
+        "assigned_vendor_role": "Vendor",
+        "assigned_vendor_user_type": 2
+      }
+    ],
+    "assigned": true,
+    "api_token": "72c71b4c019f25b4ee588e4a0237b2e5"
+  },
+  {
+    "id": 5,
+    "orid": "3-20251028122337343712",
+    "sensor_type_id": 1,
+    "sensor_node_number": 3,
+    "token_num": 5,
+    "labels": [
+      "AE-WQ",
+      "WQ01-0032-0003"
+    ],
+    "latitude": 17.3456,
+    "longitude": 78.4567,
+    "location": "gachibowli",
+    "area": "gachibowli",
+    "node_name": "WQ01-0032-0003",
+    "node_data_orid": "3-20251028122337354136",
+    "name": "Test-node-1",
+    "protocol": "HTTP",
+    "frequency": "00:00:10",
+    "port": null,
+    "ip": null,
+    "topic": null,
+    "res_name": "WQ-Sensor-1",
+    "vertical_id": 1,
+    "vertical_name": "water_quality",
+    "assigned_vendor": [
+      {
+        "assigned_vendor_id": 34,
+        "assigned_vendor_name": "Nagendra@IIITHyderabad",
+        "assigned_vendor_email": "nagendra.pagadala@research.iiit.ac.in",
+        "assigned_vendor_role": "Vendor",
+        "assigned_vendor_user_type": 2
+      }
+    ],
+    "assigned": true,
+    "api_token": "ca79951d741e72e83b5b3a94377e07a0"
+  },
+  {
+    "id": 6,
+    "orid": "3-20251028122337435998",
+    "sensor_type_id": 1,
+    "sensor_node_number": 4,
+    "token_num": 6,
+    "labels": [
+      "AE-WQ",
+      "WQ01-0032-0004"
+    ],
+    "latitude": 17.5678,
+    "longitude": 76.8976,
+    "location": "hyderabad",
+    "area": "hyderabad",
+    "node_name": "WQ01-0032-0004",
+    "node_data_orid": "3-20251028122337441894",
+    "name": "test",
+    "protocol": "HTTP",
+    "frequency": "11:11:11",
+    "port": null,
+    "ip": null,
+    "topic": null,
+    "res_name": "WQ-Sensor-1",
+    "vertical_id": 1,
+    "vertical_name": "water_quality",
+    "assigned_vendor": [
+      {
+        "assigned_vendor_id": 34,
+        "assigned_vendor_name": "Nagendra@IIITHyderabad",
+        "assigned_vendor_email": "nagendra.pagadala@research.iiit.ac.in",
+        "assigned_vendor_role": "Vendor",
+        "assigned_vendor_user_type": 2
+      }
+    ],
+    "assigned": true,
+    "api_token": "1f267bbec63afd0820f1c2aa757a9a01"
+  }
+]
