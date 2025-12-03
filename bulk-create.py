@@ -4,7 +4,7 @@ import requests
 from copy import deepcopy
 
 API_URL = "http://10.2.16.116:8610/import/import"   # update if needed
-TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjQxMzk0OTYsInN1YiI6IjEifQ.oglLzd2SKpRc7k2m3i-mk6uw0jj8Z6OEu1_AsQp7vR0"
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjQzOTc5OTEsInN1YiI6IjIifQ.V6VAMxmKAish0CHDFoARo_b7YfNAinLhUWUaaeVRJTQ"
 
 # Load your template file
 with open("import-template.json", "r") as f:

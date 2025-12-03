@@ -6,12 +6,40 @@ import time
 import itertools
 import os
 import csv
+import string
 from datetime import datetime
 from gevent.lock import Semaphore
+
+# ===== CONFIGURATION SECTION =====
+# Set ACTIVE_CONFIG to switch between environments
+ACTIVE_CONFIG = 1  # Change to 1 or 2 to switch hosts
+
+# Host and Token Configuration
+CONFIGS = {
+    1: {
+        "host": "http://10.2.16.116:8610",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjUzNTEzODcsInN1YiI6IjEifQ.PbTbI95QsKOXyiFwKQe9H9eVksTQ8Rb3InDxx6ejsO4",
+        "name": "Primary Server"
+    },
+    2: {
+        "host": "http://10.2.16.16:8008",  # Replace with actual second host
+        "token": "YOUR_SECOND_TOKEN_HERE",      # Replace with actual second token
+        "name": "Secondary Server"
+    }
+}
+
+# Get active configuration
+active_config = CONFIGS[ACTIVE_CONFIG]
+print(f"Using configuration: {active_config['name']} - {active_config['host']}")
+# ===== END CONFIGURATION SECTION =====
 
 # Shared counter and lock to deterministically assign node ids to spawned users
 node_id_counter = itertools.count(0)
 node_id_lock = Semaphore()
+
+# Global contact counter and lock to ensure unique contact numbers across requests
+contact_counter = itertools.count(9000000000)
+contact_lock = Semaphore()
 
 # CSV file lock to prevent concurrent writes
 csv_lock = Semaphore()
@@ -19,6 +47,10 @@ csv_lock = Semaphore()
 # CSV file paths
 CSV_FILE_PATH = os.path.join(os.path.dirname(__file__), "node_post_data.csv")
 CSV_GET_FILE_PATH = os.path.join(os.path.dirname(__file__), "node_get_data.csv")
+
+# Pending approvals queue (stores dicts with keys: email, username, contact)
+pending_approvals = []
+pending_approvals_lock = Semaphore()
 
 # Initialize CSV file with headers
 def initialize_csv():
@@ -104,7 +136,31 @@ def generate_water_quality_payload():
         "flow": random.randint(50, 150)  # Added flow parameter as int (50-150 L/min)
     }
 
-fetch_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjQxNDIyMzgsInN1YiI6IjEifQ.jZEiwfZ0iJgDt3vsB1A3AkQ__-c10a3oituJYoaiv28"
+
+def generate_random_username(length=8):
+    """Generate a unique timestamp-based username to avoid conflicts"""
+    timestamp = int(time.time() * 1000)  # milliseconds for better uniqueness
+    chars = string.ascii_lowercase + string.digits
+    random_part = ''.join(random.choice(chars) for _ in range(4))
+    return f"user_{timestamp}_{random_part}"
+
+
+def generate_random_email():
+    """Generate unique ctopvalidator emails with timestamp to avoid conflicts"""
+    timestamp = int(time.time() * 1000)  # milliseconds for better uniqueness
+    random_num = random.randint(1, 999)
+    return f"ctopvalidator{timestamp}{random_num}@gmail.com"
+
+
+def generate_unique_contact():
+    """Generate a unique contact number using a global monotonic counter.
+
+    Uses a Semaphore to ensure uniqueness across greenlets. Returns a string
+    suitable for contact field (10+ digits).
+    """
+    with contact_lock:
+        val = next(contact_counter)
+    return str(val)
 
 def log_to_csv(node_id, status_code, payload, payload_type):
     """Log POST request data to CSV file"""
@@ -161,10 +217,11 @@ def log_get_to_csv(node_id, status_code, endpoint, vertical_name=None, limit=Non
             logging.getLogger(__name__).error(f"Failed to write GET request to CSV: {str(e)}")
 
 class NodeUser(HttpUser):
-    host = "http://10.2.16.116:8610"
+    host = active_config['host']
     
-    # Wait between 0.1-0.5 seconds to allow continuous posting
-    wait_time = between(0.1, 0.5)
+    # Increase wait_time to reduce per-user request rate and overall throughput
+    # This reduces server load and avoids rapid duplicate conflicts
+    wait_time = between(2, 4)  # Further increased to reduce system load
 
     def on_start(self):
         logger = logging.getLogger(__name__)
@@ -312,25 +369,31 @@ class NodeUser(HttpUser):
     #     else:
     #         self._do_post()
     
-    @task(5)
-    def fetch_node_data(self):
-        logger = logging.getLogger(__name__)
-        try:
-            # ONLY fetch water_quality data
-            vertical_name = random.choice(["water_quality", "waste_management"])
-            # vertical_name = "water_quality"
-            url = f"/nodes/fetch-node-data/?vertical_name={vertical_name}&limit=100&offset=0&as_csv=false"
-            headers = {"Accept": "application/json", "Authorization": f"Bearer {fetch_token}"}
-            print(f"Node {self.node_id}: FETCH {vertical_name}")
-            response = self.client.get(url, headers=headers)
-            print(f"Node {self.node_id}: FETCH completed with status {response.status_code}")
-            logger.info(f"Node {self.node_id}: FETCH {vertical_name} completed with status {response.status_code}")
+    # @task(5)
+    # def fetch_node_data(self):
+    #     logger = logging.getLogger(__name__)
+    #     try:
+    #         # ONLY fetch water_quality data
+    #         vertical_name = random.choice(["water_quality", "waste_management"])
+    #         # vertical_name = "water_quality"
+    #         url = f"/nodes/fetch-node-data/?vertical_name={vertical_name}&limit=100&offset=0&as_csv=false"
+    #         headers = {"Accept": "application/json", "Authorization": f"Bearer {fetch_token}"}
+    #         print(f"Node {self.node_id}: FETCH {vertical_name}")
+    #         response = self.client.get(url, headers=headers)
+    #         print(f"Node {self.node_id}: FETCH completed with status {response.status_code}")
+    #         logger.info(f"Node {self.node_id}: FETCH {vertical_name} completed with status {response.status_code}")
             
-            # Log to CSV
-            log_get_to_csv(self.node_id, response.status_code, "fetch-node-data", vertical_name, 100, 0)
-        except Exception as e:
-            print(f"Node {self.node_id}: FETCH failed - {str(e)}")
-            logger.exception("fetch_node_data failed for node_id=%s", self.node_id)
+    #         # Log to CSV
+    #         log_get_to_csv(self.node_id, response.status_code, "fetch-node-data", vertical_name, 100, 0)
+    #     except Exception as e:
+    #         print(f"Node {self.node_id}: FETCH failed - {str(e)}")
+    #         logger.exception("fetch_node_data failed for node_id=%s", self.node_id)
+
+
+
+
+
+
 
     # @task(5)
     # def fetch_all_nodes(self):
@@ -349,32 +412,127 @@ class NodeUser(HttpUser):
     #         print(f"Node {self.node_id}: FETCH ALL NODES failed - {str(e)}")
     #         logger.exception("fetch_all_nodes failed for node_id=%s", self.node_id)
 
+    @task(3)
+    def user_request(self):
+        """Create a new user/vendor request via form-data POST to /user-request"""
+        logger = logging.getLogger(__name__)
+        try:
+            username = generate_random_username()
+            email = generate_random_email()
+            contact = generate_unique_contact()
+            
+            # Only use 'vendor' (type 2) to avoid vendor_email validation issues
+            # vendor_operator (type 3) requires existing vendor in DB which we can't guarantee
+            user_type = "vendor"
+            vendor_email = ""  # Empty for vendor type
+
+            data = {
+                "username": username,
+                "firstname": "Auto",
+                "lastname": "Tester",
+                "email": email,
+                "location": "Test Location",
+                "organisation": "TestOrg",
+                "designation": "Tester",
+                "contact": contact,
+                "vendor_website": "https://example.com",
+                "vendor_email": vendor_email,
+                "user_type": user_type
+            }
+
+            headers = {"Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"}
+            print(f"Node {self.node_id}: USER-REQUEST POST username={username} email={email} contact={contact} user_type={user_type} vendor_email={vendor_email}")
+            response = self.client.post("/onboard/user-request", data=data, headers=headers)
+            print(f"Node {self.node_id}: USER-REQUEST completed with status {response.status_code}")
+            logger.info(f"Node {self.node_id}: USER-REQUEST completed with status {response.status_code}")
+            
+            # If the request was accepted, add the email to pending approvals list
+            if 200 <= response.status_code < 300:
+                with pending_approvals_lock:
+                    pending_approvals.append({"email": email, "username": username, "contact": contact})
+                print(f"Node {self.node_id}: USER-REQUEST SUCCESS - Added {email} to pending approvals queue")
+            else:
+                # Log detailed error information for non-2xx responses
+                print(f"Node {self.node_id}: USER-REQUEST FAILED - Status {response.status_code}")
+                try:
+                    error_body = response.json() if response.content else "No response body"
+                    print(f"Node {self.node_id}: USER-REQUEST ERROR DETAILS: {error_body}")
+                    logger.error(f"Node {self.node_id}: USER-REQUEST failed with {response.status_code}: {error_body}")
+                except:
+                    error_text = response.text if hasattr(response, 'text') else str(response.content)
+                    print(f"Node {self.node_id}: USER-REQUEST RAW ERROR: {error_text}")
+                    logger.error(f"Node {self.node_id}: USER-REQUEST raw error: {error_text}")
+
+            # No CSV logging for this API as requested
+        except Exception as e:
+            print(f"Node {self.node_id}: USER-REQUEST failed - {str(e)}")
+            logger.exception("user_request failed for node_id=%s", self.node_id)
+
+    @task(1)
+    def approve_vendor(self):
+        """Approve a pending vendor request by email (consumes from pending_approvals)."""
+        logger = logging.getLogger(__name__)
+        try:
+            with pending_approvals_lock:
+                if not pending_approvals:
+                    return
+                item = pending_approvals.pop(0)
+
+            email = item.get("email")
+            if not email:
+                return
+
+            headers = {"Accept": "application/json", "Authorization": f"Bearer {active_config['token']}"}
+            # Send email as query parameter, not JSON body (API expects ?email=...)
+            url = f"/onboard/approve-vendor?email={email}"
+            print(f"Node {self.node_id}: APPROVE-VENDOR POST email={email}")
+            response = self.client.post(url, headers=headers)
+            print(f"Node {self.node_id}: APPROVE-VENDOR completed with status {response.status_code}")
+            logger.info(f"Node {self.node_id}: APPROVE-VENDOR completed for {email} with status {response.status_code}")
+            
+            # Log detailed error information for non-2xx responses
+            if not (200 <= response.status_code < 300):
+                print(f"Node {self.node_id}: APPROVE-VENDOR FAILED - Status {response.status_code} for {email}")
+                try:
+                    error_body = response.json() if response.content else "No response body"
+                    print(f"Node {self.node_id}: APPROVE-VENDOR ERROR DETAILS: {error_body}")
+                    logger.error(f"Node {self.node_id}: APPROVE-VENDOR failed for {email} with {response.status_code}: {error_body}")
+                except:
+                    error_text = response.text if hasattr(response, 'text') else str(response.content)
+                    print(f"Node {self.node_id}: APPROVE-VENDOR RAW ERROR: {error_text}")
+                    logger.error(f"Node {self.node_id}: APPROVE-VENDOR raw error for {email}: {error_text}")
+        except Exception as e:
+            print(f"Node {self.node_id}: APPROVE-VENDOR failed - {str(e)}")
+            logger.exception("approve_vendor failed for node_id=%s", self.node_id)
+
 
 class GradualIncreaseLoadShape(LoadTestShape):
     """
-    Fast ramp-up to 1000 users within 1 minute, then maintain.
-    - Reach 1000 users in 60 seconds
-    - Maintain 1000 users for the remaining test duration
-    - Total duration: 30 minutes 1 second (1801 seconds)
+    Ramp-up from 100 to 500 users over 5 minutes, then maintain.
+    - Start with 100 users
+    - Reach 500 users in 5 minutes (300 seconds)
+    - Maintain 500 users for the remaining test duration
+    - Total duration: 30 minutes (1800 seconds)
     """
     
     def tick(self):
         run_time = self.get_run_time()
         
-        # Total test duration: 30 minutes 1 second = 1801 seconds
-        if run_time > 1801:
+        # Total test duration: 30 minutes = 1800 seconds
+        if run_time > 1800:
             return None
         
-        # Ramp up to 1000 users in 60 seconds
-        if run_time < 60:
-            # Linear ramp-up: from 0 to 1000 users in 60 seconds
-            current_users = int((run_time / 60) * 1000)
-            # Spawn rate: 1000 users in 60 seconds = ~16.67 users per second
-            spawn_rate = 17  # Spawn 17 users per second for fast ramp-up
+        # Stepwise ramp-up: increase 100 users every full minute for 5 minutes
+        if run_time < 300:
+            stage = int(run_time // 60)  # 0..4
+            current_users = 100 + (stage * 100)
+            # When a new stage occurs Locust will spawn users up to the new target.
+            # Set spawn_rate to ~2 users/sec to reach the new stage quickly but not instantaneously.
+            spawn_rate = 2
         else:
-            # Maintain 1000 users after 60 seconds
-            current_users = 1000
-            spawn_rate = 17  # Keep same spawn rate for any adjustments
+            # Maintain 500 users after 300 seconds
+            current_users = 500
+            spawn_rate = 2  # Keep same spawn rate for any adjustments
         
         return current_users, spawn_rate
 
