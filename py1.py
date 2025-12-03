@@ -22,8 +22,8 @@ CONFIGS = {
         "name": "Primary Server"
     },
     2: {
-        "host": "http://10.2.16.16:8008",  # Replace with actual second host
-        "token": "YOUR_SECOND_TOKEN_HERE",      # Replace with actual second token
+        "host": "http://10.2.16.16:8611",  # Replace with actual second host
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjUzNjkyNDcsInN1YiI6IjEiLCJ0eXBlIjoiYWNjZXNzIn0.DLVdHHw34AEzu0CJA98tKay9k-KVW1gkM1w2mJv534M",      # Replace with actual second token
         "name": "Secondary Server"
     }
 }
