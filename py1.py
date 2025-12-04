@@ -412,98 +412,127 @@ class NodeUser(HttpUser):
     #         print(f"Node {self.node_id}: FETCH ALL NODES failed - {str(e)}")
     #         logger.exception("fetch_all_nodes failed for node_id=%s", self.node_id)
 
-    @task(3)
-    def user_request(self):
-        """Create a new user/vendor request via form-data POST to /user-request"""
-        logger = logging.getLogger(__name__)
-        try:
-            username = generate_random_username()
-            email = generate_random_email()
-            contact = generate_unique_contact()
+    # @task(3)
+    # def user_request(self):
+    #     """Create a new user/vendor request via form-data POST to /user-request"""
+    #     logger = logging.getLogger(__name__)
+    #     try:
+    #         username = generate_random_username()
+    #         email = generate_random_email()
+    #         contact = generate_unique_contact()
             
-            # Only use 'vendor' (type 2) to avoid vendor_email validation issues
-            # vendor_operator (type 3) requires existing vendor in DB which we can't guarantee
-            user_type = "vendor"
-            vendor_email = ""  # Empty for vendor type
+    #         # Only use 'vendor' (type 2) to avoid vendor_email validation issues
+    #         # vendor_operator (type 3) requires existing vendor in DB which we can't guarantee
+    #         user_type = "vendor"
+    #         vendor_email = ""  # Empty for vendor type
 
-            data = {
-                "username": username,
-                "firstname": "Auto",
-                "lastname": "Tester",
-                "email": email,
-                "location": "Test Location",
-                "organisation": "TestOrg",
-                "designation": "Tester",
-                "contact": contact,
-                "vendor_website": "https://example.com",
-                "vendor_email": vendor_email,
-                "user_type": user_type
-            }
+    #         data = {
+    #             "username": username,
+    #             "firstname": "Auto",
+    #             "lastname": "Tester",
+    #             "email": email,
+    #             "location": "Test Location",
+    #             "organisation": "TestOrg",
+    #             "designation": "Tester",
+    #             "contact": contact,
+    #             "vendor_website": "https://example.com",
+    #             "vendor_email": vendor_email,
+    #             "user_type": user_type
+    #         }
 
-            headers = {"Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"}
-            print(f"Node {self.node_id}: USER-REQUEST POST username={username} email={email} contact={contact} user_type={user_type} vendor_email={vendor_email}")
-            response = self.client.post("/onboard/user-request", data=data, headers=headers)
-            print(f"Node {self.node_id}: USER-REQUEST completed with status {response.status_code}")
-            logger.info(f"Node {self.node_id}: USER-REQUEST completed with status {response.status_code}")
+    #         headers = {"Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"}
+    #         print(f"Node {self.node_id}: USER-REQUEST POST username={username} email={email} contact={contact} user_type={user_type} vendor_email={vendor_email}")
+    #         response = self.client.post("/onboard/user-request", data=data, headers=headers)
+    #         print(f"Node {self.node_id}: USER-REQUEST completed with status {response.status_code}")
+    #         logger.info(f"Node {self.node_id}: USER-REQUEST completed with status {response.status_code}")
             
-            # If the request was accepted, add the email to pending approvals list
-            if 200 <= response.status_code < 300:
-                with pending_approvals_lock:
-                    pending_approvals.append({"email": email, "username": username, "contact": contact})
-                print(f"Node {self.node_id}: USER-REQUEST SUCCESS - Added {email} to pending approvals queue")
-            else:
-                # Log detailed error information for non-2xx responses
-                print(f"Node {self.node_id}: USER-REQUEST FAILED - Status {response.status_code}")
-                try:
-                    error_body = response.json() if response.content else "No response body"
-                    print(f"Node {self.node_id}: USER-REQUEST ERROR DETAILS: {error_body}")
-                    logger.error(f"Node {self.node_id}: USER-REQUEST failed with {response.status_code}: {error_body}")
-                except:
-                    error_text = response.text if hasattr(response, 'text') else str(response.content)
-                    print(f"Node {self.node_id}: USER-REQUEST RAW ERROR: {error_text}")
-                    logger.error(f"Node {self.node_id}: USER-REQUEST raw error: {error_text}")
+    #         # If the request was accepted, add the email to pending approvals list
+    #         if 200 <= response.status_code < 300:
+    #             with pending_approvals_lock:
+    #                 pending_approvals.append({"email": email, "username": username, "contact": contact})
+    #             print(f"Node {self.node_id}: USER-REQUEST SUCCESS - Added {email} to pending approvals queue")
+    #         else:
+    #             # Log detailed error information for non-2xx responses
+    #             print(f"Node {self.node_id}: USER-REQUEST FAILED - Status {response.status_code}")
+    #             try:
+    #                 error_body = response.json() if response.content else "No response body"
+    #                 print(f"Node {self.node_id}: USER-REQUEST ERROR DETAILS: {error_body}")
+    #                 logger.error(f"Node {self.node_id}: USER-REQUEST failed with {response.status_code}: {error_body}")
+    #             except:
+    #                 error_text = response.text if hasattr(response, 'text') else str(response.content)
+    #                 print(f"Node {self.node_id}: USER-REQUEST RAW ERROR: {error_text}")
+    #                 logger.error(f"Node {self.node_id}: USER-REQUEST raw error: {error_text}")
 
-            # No CSV logging for this API as requested
-        except Exception as e:
-            print(f"Node {self.node_id}: USER-REQUEST failed - {str(e)}")
-            logger.exception("user_request failed for node_id=%s", self.node_id)
+    #         # No CSV logging for this API as requested
+    #     except Exception as e:
+    #         print(f"Node {self.node_id}: USER-REQUEST failed - {str(e)}")
+    #         logger.exception("user_request failed for node_id=%s", self.node_id)
 
-    @task(1)
-    def approve_vendor(self):
-        """Approve a pending vendor request by email (consumes from pending_approvals)."""
-        logger = logging.getLogger(__name__)
-        try:
-            with pending_approvals_lock:
-                if not pending_approvals:
-                    return
-                item = pending_approvals.pop(0)
+    # @task(1)
+    # def approve_vendor(self):
+    #     """Approve a pending vendor request by email (consumes from pending_approvals)."""
+    #     logger = logging.getLogger(__name__)
+    #     try:
+    #         with pending_approvals_lock:
+    #             if not pending_approvals:
+    #                 return
+    #             item = pending_approvals.pop(0)
 
-            email = item.get("email")
-            if not email:
-                return
+    #         email = item.get("email")
+    #         if not email:
+    #             return
 
-            headers = {"Accept": "application/json", "Authorization": f"Bearer {active_config['token']}"}
-            # Send email as query parameter, not JSON body (API expects ?email=...)
-            url = f"/onboard/approve-vendor?email={email}"
-            print(f"Node {self.node_id}: APPROVE-VENDOR POST email={email}")
-            response = self.client.post(url, headers=headers)
-            print(f"Node {self.node_id}: APPROVE-VENDOR completed with status {response.status_code}")
-            logger.info(f"Node {self.node_id}: APPROVE-VENDOR completed for {email} with status {response.status_code}")
+    #         headers = {"Accept": "application/json", "Authorization": f"Bearer {active_config['token']}"}
+    #         # Send email as query parameter, not JSON body (API expects ?email=...)
+    #         url = f"/onboard/approve-vendor?email={email}"
+    #         print(f"Node {self.node_id}: APPROVE-VENDOR POST email={email}")
+    #         response = self.client.post(url, headers=headers)
+    #         print(f"Node {self.node_id}: APPROVE-VENDOR completed with status {response.status_code}")
+    #         logger.info(f"Node {self.node_id}: APPROVE-VENDOR completed for {email} with status {response.status_code}")
             
-            # Log detailed error information for non-2xx responses
-            if not (200 <= response.status_code < 300):
-                print(f"Node {self.node_id}: APPROVE-VENDOR FAILED - Status {response.status_code} for {email}")
-                try:
-                    error_body = response.json() if response.content else "No response body"
-                    print(f"Node {self.node_id}: APPROVE-VENDOR ERROR DETAILS: {error_body}")
-                    logger.error(f"Node {self.node_id}: APPROVE-VENDOR failed for {email} with {response.status_code}: {error_body}")
-                except:
-                    error_text = response.text if hasattr(response, 'text') else str(response.content)
-                    print(f"Node {self.node_id}: APPROVE-VENDOR RAW ERROR: {error_text}")
-                    logger.error(f"Node {self.node_id}: APPROVE-VENDOR raw error for {email}: {error_text}")
-        except Exception as e:
-            print(f"Node {self.node_id}: APPROVE-VENDOR failed - {str(e)}")
-            logger.exception("approve_vendor failed for node_id=%s", self.node_id)
+    #         # Log detailed error information for non-2xx responses
+    #         if not (200 <= response.status_code < 300):
+    #             print(f"Node {self.node_id}: APPROVE-VENDOR FAILED - Status {response.status_code} for {email}")
+    #             try:
+    #                 error_body = response.json() if response.content else "No response body"
+    #                 print(f"Node {self.node_id}: APPROVE-VENDOR ERROR DETAILS: {error_body}")
+    #                 logger.error(f"Node {self.node_id}: APPROVE-VENDOR failed for {email} with {response.status_code}: {error_body}")
+    #             except:
+    #                 error_text = response.text if hasattr(response, 'text') else str(response.content)
+    #                 print(f"Node {self.node_id}: APPROVE-VENDOR RAW ERROR: {error_text}")
+    #                 logger.error(f"Node {self.node_id}: APPROVE-VENDOR raw error for {email}: {error_text}")
+    #     except Exception as e:
+    #         print(f"Node {self.node_id}: APPROVE-VENDOR failed - {str(e)}")
+    #         logger.exception("approve_vendor failed for node_id=%s", self.node_id)
+
+        @task(1)
+        def login_task(self):
+            """Authenticate using admin credentials to /login and log non-2xx responses."""
+            logger = logging.getLogger(__name__)
+            try:
+                payload = {"email": "admin@localhost", "password": "admin"}
+                headers = {"Accept": "application/json", "Content-Type": "application/json"}
+                print(f"Node {self.node_id}: LOGIN POST email={payload['email']}")
+                response = self.client.post("/login", json=payload, headers=headers)
+                print(f"Node {self.node_id}: LOGIN completed with status {response.status_code}")
+                logger.info(f"Node {self.node_id}: LOGIN completed with status {response.status_code}")
+
+                if not (200 <= response.status_code < 300):
+                    print(f"Node {self.node_id}: LOGIN FAILED - Status {response.status_code}")
+                    try:
+                        error_body = response.json() if response.content else "No response body"
+                        print(f"Node {self.node_id}: LOGIN ERROR DETAILS: {error_body}")
+                        logger.error(f"Node {self.node_id}: LOGIN failed with {response.status_code}: {error_body}")
+                    except:
+                        error_text = response.text if hasattr(response, 'text') else str(response.content)
+                        print(f"Node {self.node_id}: LOGIN RAW ERROR: {error_text}")
+                        logger.error(f"Node {self.node_id}: LOGIN raw error: {error_text}")
+                else:
+                    # Optionally extract tokens or response body if needed in future
+                    pass
+            except Exception as e:
+                print(f"Node {self.node_id}: LOGIN failed - {str(e)}")
+                logger.exception("login_task failed for node_id=%s", self.node_id)
 
 
 class GradualIncreaseLoadShape(LoadTestShape):
