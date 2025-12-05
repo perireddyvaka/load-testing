@@ -505,34 +505,67 @@ class NodeUser(HttpUser):
     #         print(f"Node {self.node_id}: APPROVE-VENDOR failed - {str(e)}")
     #         logger.exception("approve_vendor failed for node_id=%s", self.node_id)
 
+    # @task(1)
+    # def login_task(self):
+    #     """Authenticate using admin credentials to /login and log non-2xx responses."""
+    #     logger = logging.getLogger(__name__)
+    #     try:
+    #         payload = {"email": "admin@localhost", "password": "admin"}
+    #         headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    #         print(f"Node {self.node_id}: LOGIN POST email={payload['email']}")
+    #         response = self.client.post("/user/login", json=payload, headers=headers)
+    #         print(f"Node {self.node_id}: LOGIN completed with status {response.status_code}")
+    #         logger.info(f"Node {self.node_id}: LOGIN completed with status {response.status_code}")
+
+    #         if not (200 <= response.status_code < 300):
+    #             print(f"Node {self.node_id}: LOGIN FAILED - Status {response.status_code}")
+    #             try:
+    #                 error_body = response.json() if response.content else "No response body"
+    #                 print(f"Node {self.node_id}: LOGIN ERROR DETAILS: {error_body}")
+    #                 logger.error(f"Node {self.node_id}: LOGIN failed with {response.status_code}: {error_body}")
+    #             except:
+    #                 error_text = response.text if hasattr(response, 'text') else str(response.content)
+    #                 print(f"Node {self.node_id}: LOGIN RAW ERROR: {error_text}")
+    #                 logger.error(f"Node {self.node_id}: LOGIN raw error: {error_text}")
+    #         else:
+    #             # Optionally extract tokens or response body if needed in future
+    #             pass
+    #     except Exception as e:
+    #         print(f"Node {self.node_id}: LOGIN failed - {str(e)}")
+    #         logger.exception("login_task failed for node_id=%s", self.node_id)
+
     @task(1)
-    def login_task(self):
-        """Authenticate using admin credentials to /login and log non-2xx responses."""
+    def getusers_task(self):
+        """Get users list with admin token to /getusers and log non-2xx responses."""
         logger = logging.getLogger(__name__)
         try:
-            payload = {"email": "admin@localhost", "password": "admin"}
-            headers = {"Accept": "application/json", "Content-Type": "application/json"}
-            print(f"Node {self.node_id}: LOGIN POST email={payload['email']}")
-            response = self.client.post("/user/login", json=payload, headers=headers)
-            print(f"Node {self.node_id}: LOGIN completed with status {response.status_code}")
-            logger.info(f"Node {self.node_id}: LOGIN completed with status {response.status_code}")
+            headers = {"Accept": "application/json", "Authorization": f"Bearer {active_config['token']}"}
+            print(f"Node {self.node_id}: GETUSERS GET request")
+            response = self.client.get("/getusers", headers=headers)
+            print(f"Node {self.node_id}: GETUSERS completed with status {response.status_code}")
+            logger.info(f"Node {self.node_id}: GETUSERS completed with status {response.status_code}")
 
             if not (200 <= response.status_code < 300):
-                print(f"Node {self.node_id}: LOGIN FAILED - Status {response.status_code}")
+                print(f"Node {self.node_id}: GETUSERS FAILED - Status {response.status_code}")
                 try:
                     error_body = response.json() if response.content else "No response body"
-                    print(f"Node {self.node_id}: LOGIN ERROR DETAILS: {error_body}")
-                    logger.error(f"Node {self.node_id}: LOGIN failed with {response.status_code}: {error_body}")
+                    print(f"Node {self.node_id}: GETUSERS ERROR DETAILS: {error_body}")
+                    logger.error(f"Node {self.node_id}: GETUSERS failed with {response.status_code}: {error_body}")
                 except:
                     error_text = response.text if hasattr(response, 'text') else str(response.content)
-                    print(f"Node {self.node_id}: LOGIN RAW ERROR: {error_text}")
-                    logger.error(f"Node {self.node_id}: LOGIN raw error: {error_text}")
+                    print(f"Node {self.node_id}: GETUSERS RAW ERROR: {error_text}")
+                    logger.error(f"Node {self.node_id}: GETUSERS raw error: {error_text}")
             else:
-                # Optionally extract tokens or response body if needed in future
-                pass
+                # Successful response - could log user count if needed
+                try:
+                    users_data = response.json()
+                    user_count = len(users_data) if isinstance(users_data, list) else "unknown"
+                    print(f"Node {self.node_id}: GETUSERS SUCCESS - Retrieved {user_count} users")
+                except:
+                    print(f"Node {self.node_id}: GETUSERS SUCCESS - Response received")
         except Exception as e:
-            print(f"Node {self.node_id}: LOGIN failed - {str(e)}")
-            logger.exception("login_task failed for node_id=%s", self.node_id)
+            print(f"Node {self.node_id}: GETUSERS failed - {str(e)}")
+            logger.exception("getusers_task failed for node_id=%s", self.node_id)
 
 
 class GradualIncreaseLoadShape(LoadTestShape):
