@@ -12,7 +12,7 @@ from gevent.lock import Semaphore
 
 # ===== CONFIGURATION SECTION =====
 # Set ACTIVE_CONFIG to switch between environments
-ACTIVE_CONFIG = 1  # Change to 1 or 2 to switch hosts
+ACTIVE_CONFIG = 12  # Change to 1 or 2 to switch hosts
 
 # Host and Token Configuration
 CONFIGS = {
@@ -23,7 +23,7 @@ CONFIGS = {
     },
     2: {
         "host": "http://10.2.16.16:8611",  # Replace with actual second host
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjUzNjkyNDcsInN1YiI6IjEiLCJ0eXBlIjoiYWNjZXNzIn0.DLVdHHw34AEzu0CJA98tKay9k-KVW1gkM1w2mJv534M",      # Replace with actual second token
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjU1MzQyOTIsInN1YiI6IjEiLCJ0eXBlIjoiYWNjZXNzIn0.c0-cFZwu-FELsfcBxx2e1mWrSFp08e92m9K1R7wn4PM",      # Replace with actual second token
         "name": "Secondary Server"
     }
 }
