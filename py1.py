@@ -12,7 +12,7 @@ from gevent.lock import Semaphore
 
 # ===== CONFIGURATION SECTION =====
 # Set ACTIVE_CONFIG to switch between environments
-ACTIVE_CONFIG = 12  # Change to 1 or 2 to switch hosts
+ACTIVE_CONFIG = 2  # Change to 1 or 2 to switch hosts
 
 # Host and Token Configuration
 CONFIGS = {
@@ -534,38 +534,88 @@ class NodeUser(HttpUser):
     #         print(f"Node {self.node_id}: LOGIN failed - {str(e)}")
     #         logger.exception("login_task failed for node_id=%s", self.node_id)
 
+    # @task(1)
+    # def getusers_task(self):
+    #     """Get users list with admin token to /getusers and log non-2xx responses."""
+    #     logger = logging.getLogger(__name__)
+    #     try:
+    #         headers = {"Accept": "application/json", "Authorization": f"Bearer {active_config['token']}"}
+    #         print(f"Node {self.node_id}: GETUSERS GET request")
+    #         response = self.client.get("/getusers", headers=headers)
+    #         print(f"Node {self.node_id}: GETUSERS completed with status {response.status_code}")
+    #         logger.info(f"Node {self.node_id}: GETUSERS completed with status {response.status_code}")
+
+    #         if not (200 <= response.status_code < 300):
+    #             print(f"Node {self.node_id}: GETUSERS FAILED - Status {response.status_code}")
+    #             try:
+    #                 error_body = response.json() if response.content else "No response body"
+    #                 print(f"Node {self.node_id}: GETUSERS ERROR DETAILS: {error_body}")
+    #                 logger.error(f"Node {self.node_id}: GETUSERS failed with {response.status_code}: {error_body}")
+    #             except:
+    #                 error_text = response.text if hasattr(response, 'text') else str(response.content)
+    #                 print(f"Node {self.node_id}: GETUSERS RAW ERROR: {error_text}")
+    #                 logger.error(f"Node {self.node_id}: GETUSERS raw error: {error_text}")
+    #         else:
+    #             # Successful response - could log user count if needed
+    #             try:
+    #                 users_data = response.json()
+    #                 user_count = len(users_data) if isinstance(users_data, list) else "unknown"
+    #                 print(f"Node {self.node_id}: GETUSERS SUCCESS - Retrieved {user_count} users")
+    #             except:
+    #                 print(f"Node {self.node_id}: GETUSERS SUCCESS - Response received")
+    #     except Exception as e:
+    #         print(f"Node {self.node_id}: GETUSERS failed - {str(e)}")
+    #         logger.exception("getusers_task failed for node_id=%s", self.node_id)
+
     @task(1)
-    def getusers_task(self):
-        """Get users list with admin token to /getusers and log non-2xx responses."""
+    def submit_verticals(self):
+        """Submit verticals JSON file to /onboard/verticals-request/{vendor_id} as file upload."""
         logger = logging.getLogger(__name__)
         try:
-            headers = {"Accept": "application/json", "Authorization": f"Bearer {active_config['token']}"}
-            print(f"Node {self.node_id}: GETUSERS GET request")
-            response = self.client.get("/getusers", headers=headers)
-            print(f"Node {self.node_id}: GETUSERS completed with status {response.status_code}")
-            logger.info(f"Node {self.node_id}: GETUSERS completed with status {response.status_code}")
+            # Load verticals.json from the same directory as this script
+            json_path = os.path.join(os.path.dirname(__file__), "verticals.json")
+            if not os.path.exists(json_path):
+                print(f"Node {self.node_id}: verticals.json not found at {json_path}")
+                return
+
+            # Use specific vendor ID 503 and vendor token
+            vendor_id = 503
+            vendor_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjU3MzE0OTgsInN1YiI6IjUwMyJ9.LF2Kv7ZwzKv29ZNUlX5DcHLtbEwuw3G1bpFSEoB2pHY"
+            url = f"/onboard/verticals-request/{vendor_id}"
+            
+            # Prepare file upload - multipart/form-data
+            with open(json_path, 'rb') as file_obj:
+                files = {'file': ('verticals.json', file_obj, 'application/json')}
+                headers = {"Accept": "application/json", "Authorization": f"Bearer {vendor_token}"}
+                # Don't set Content-Type manually for multipart uploads - requests will set it automatically
+
+                print(f"Node {self.node_id}: SUBMIT-VERTICALS POST vendor_id={vendor_id} (file upload)")
+                response = self.client.post(url, files=files, headers=headers, timeout=60)
+                
+            print(f"Node {self.node_id}: SUBMIT-VERTICALS completed with status {response.status_code}")
+            logger.info(f"Node {self.node_id}: SUBMIT-VERTICALS completed with status {response.status_code}")
 
             if not (200 <= response.status_code < 300):
-                print(f"Node {self.node_id}: GETUSERS FAILED - Status {response.status_code}")
+                print(f"Node {self.node_id}: SUBMIT-VERTICALS FAILED - Status {response.status_code}")
                 try:
                     error_body = response.json() if response.content else "No response body"
-                    print(f"Node {self.node_id}: GETUSERS ERROR DETAILS: {error_body}")
-                    logger.error(f"Node {self.node_id}: GETUSERS failed with {response.status_code}: {error_body}")
+                    print(f"Node {self.node_id}: SUBMIT-VERTICALS ERROR DETAILS: {error_body}")
+                    logger.error(f"Node {self.node_id}: SUBMIT-VERTICALS failed with {response.status_code}: {error_body}")
                 except:
                     error_text = response.text if hasattr(response, 'text') else str(response.content)
-                    print(f"Node {self.node_id}: GETUSERS RAW ERROR: {error_text}")
-                    logger.error(f"Node {self.node_id}: GETUSERS raw error: {error_text}")
+                    print(f"Node {self.node_id}: SUBMIT-VERTICALS RAW ERROR: {error_text}")
+                    logger.error(f"Node {self.node_id}: SUBMIT-VERTICALS raw error: {error_text}")
             else:
-                # Successful response - could log user count if needed
                 try:
-                    users_data = response.json()
-                    user_count = len(users_data) if isinstance(users_data, list) else "unknown"
-                    print(f"Node {self.node_id}: GETUSERS SUCCESS - Retrieved {user_count} users")
+                    resp = response.json()
+                    submission_id = resp.get('submission_id', 'unknown')
+                    input_type = resp.get('input_type', 'unknown')
+                    print(f"Node {self.node_id}: SUBMIT-VERTICALS SUCCESS - submission_id: {submission_id}, input_type: {input_type}")
                 except:
-                    print(f"Node {self.node_id}: GETUSERS SUCCESS - Response received")
+                    print(f"Node {self.node_id}: SUBMIT-VERTICALS SUCCESS - response received")
         except Exception as e:
-            print(f"Node {self.node_id}: GETUSERS failed - {str(e)}")
-            logger.exception("getusers_task failed for node_id=%s", self.node_id)
+            print(f"Node {self.node_id}: SUBMIT-VERTICALS failed - {str(e)}")
+            logger.exception("submit_verticals failed for node_id=%s", self.node_id)
 
 
 class GradualIncreaseLoadShape(LoadTestShape):

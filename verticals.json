@@ -1,0 +1,24 @@
+
+[
+  {
+    "res_name": "wewe",
+    "res_short_name": "dz",
+    "description": "Domain for managing and monitoring weather",
+    "pdescription": ["Temperature"],
+    "name": ["Temperature"],
+    "data_types": ["float"],
+    "accuracy": ["±1"],
+    "units": ["°C"],
+    "resolution": ["0.1"],
+    "ideal": [
+      { "min": 15, "max": 30 }
+    ],
+    "moderate": [
+      { "min": 10, "max": 15 },
+      { "min": 30, "max": 35 }
+    ],
+    "extreme": [
+      { "min": 5, "max": null }
+    ]
+  }
+]
